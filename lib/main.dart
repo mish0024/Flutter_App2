@@ -1,10 +1,32 @@
 import 'package:flutter/material.dart';
-// import 'home_page.dart';
-// import 'data_page.dart';
-// import 'contact_page.dart';
+import 'package:flutter_app2/screens/contactScreen.dart';
+import 'package:flutter_app2/screens/dataScreen.dart';
+import 'package:flutter_app2/screens/homeScreen.dart';
 
 void main() {
   runApp(const MyApp());
+}
+
+class NavigationService {
+  static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+}
+
+class GlobalThemeData {
+  static ColorScheme themeData() {
+    return const ColorScheme(
+      brightness: Brightness.light,
+      primary: Color(0xFF0078D7),
+      onPrimary: Color(0xFFF0F8FF),
+      secondary: Color(0xFF673AB7),
+      onSecondary: Color(0xFFEDE7F6),
+      error: Colors.red,
+      onError: Colors.white,
+      surface: Color(0xFFF5F5F5),
+      onSurface: Colors.black,
+      background: Color(0xFFE3F2FD),
+      onBackground: Colors.black,
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -13,112 +35,78 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Modern Flutter App',
+      navigatorKey: NavigationService.navigatorKey,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        textTheme: const TextTheme(
+          bodySmall: TextStyle(fontSize: 14, color: Colors.black),
+          bodyMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          headlineMedium: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        colorScheme: GlobalThemeData.themeData(),
         useMaterial3: true,
       ),
-      home: const NavigationApp(),
+      home: const MainPage(),
     );
   }
 }
 
-class NavigationApp extends StatefulWidget {
-  const NavigationApp({super.key});
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
 
   @override
-  State<NavigationApp> createState() => _NavigationAppState();
+  State<MainPage> createState() => _MainPageState();
 }
 
-class _NavigationAppState extends State<NavigationApp> {
-  int _selectedIndex = 0;
+class _MainPageState extends State<MainPage> {
+  int currentIndex = 0;
 
-  final List<Widget> _pages = [
+  final screens = [
     const HomePage(),
     const DataPage(),
     const ContactPage(),
   ];
 
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    final colorTheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Flutter Navigation App'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: colorTheme.onPrimary,
+        title: Text(
+          'Modern App',
+          style: TextStyle(color: colorTheme.primary),
+        ),
+        centerTitle: true,
       ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _onItemTapped,
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.data_usage), label: 'Data'),
-          NavigationDestination(icon: Icon(Icons.contact_page), label: 'Contact'),
-        ],
-      ),
-      floatingActionButton: _selectedIndex == 0
-          ? FloatingActionButton(
-              onPressed: _incrementCounter,
-              tooltip: 'Increment',
-              child: const Icon(Icons.add),
-            )
-          : null,
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('You have pushed the button this many times:'),
-          Text(
-            '${context.findAncestorStateOfType<_NavigationAppState>()?._counter ?? 0}',
-            style: Theme.of(context).textTheme.headlineMedium,
+      body: screens[currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: colorTheme.onPrimary,
+        selectedItemColor: colorTheme.primary,
+        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
+        currentIndex: currentIndex,
+        onTap: (index) {
+          setState(() => currentIndex = index);
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.explore_outlined),
+            activeIcon: Icon(Icons.explore),
+            label: 'Explore',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list_alt_outlined),
+            activeIcon: Icon(Icons.list_alt),
+            label: 'Users',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat_outlined),
+            activeIcon: Icon(Icons.chat),
+            label: 'Chat',
           ),
         ],
       ),
     );
-  }
-}
-
-// Define `DataPage` and `ContactPage` similarly as placeholders.
-class DataPage extends StatelessWidget {
-  const DataPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Data Page'));
-  }
-}
-
-class ContactPage extends StatelessWidget {
-  const ContactPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Contact Page'));
   }
 }
